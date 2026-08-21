@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-stone-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUR - Fine Garments & Bulk Shirts Catalogue</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fcfbf7',
+                            100: '#f6f3e8',
+                            200: '#ece5d0',
+                            800: '#272522',
+                            900: '#181715',
+                            accent: '#b8860b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase App & Firestore Modular SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Optional Firebase config handling
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tur-garments-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+        if (firebaseConfig) {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (e) {
+                    console.log("Firebase Auth notice: running local mode fallback.");
+                }
+            };
+            initAuth();
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-serif-brand {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        /* Zoom container */
+        .zoom-img-container {
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        .zoom-img-container img {
+            transition: transform 0.3s ease;
+        }
+        .zoom-img-container:hover img {
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-900 antialiased min-h-full flex flex-col selection:bg-stone-900 selection:text-white">
+
+    <!-- TOP APP BAR / HEADER -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm transition-all duration-200" id="mainHeader">
+        <div class="max-w-md mx-auto sm:max-w-3xl lg:max-w-6xl px-4 py-3 flex items-center justify-between">
+            <!-- Brand Title -->
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
+                <span class="font-serif-brand text-2xl tracking-widest font-bold text-stone-900 uppercase">TUR</span>
+                <span class="text-[10px] tracking-wider uppercase font-semibold text-stone-500 bg-stone-100 px-2 py-0.5 rounded border border-stone-200">Garments</span>
+            </div>
+
+            <!-- Quick Action Header Controls -->
+            <div class="flex items-center space-x-2">
+                <button onclick="openAdminDashboardDirect()" class="w-9 h-9 flex items-center justify-center rounded-full text-stone-700 hover:bg-stone-100 transition" title="Owner Admin Portal">
+                    <i class="fa-solid fa-user-gear text-sm"></i>
+                </button>
+                <button onclick="openSearchModal()" class="w-9 h-9 flex items-center justify-center rounded-full text-stone-700 hover:bg-stone-100 transition" title="Search Garments">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </button>
+                <button onclick="contactWhatsAppDirect()" class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition" title="WhatsApp Us">
+                    <i class="fa-brands fa-whatsapp text-xl"></i>
+                </button>
+                <button onclick="makeDirectCall()" class="w-9 h-9 flex items-center justify-center rounded-full bg-stone-100 text-stone-800 hover:bg-stone-200 transition" title="Call Shop">
+                    <i class="fa-solid fa-phone text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-md mx-auto sm:max-w-3xl lg:max-w-6xl w-full pb-20 pt-2 px-3 sm:px-6" id="appRoot">
+        <!-- Dynamic Views Will Be Rendered Here via JavaScript -->
+    </main>
+
+    <!-- CUSTOMER BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-lg" id="bottomNav">
+        <div class="max-w-md mx-auto sm:max-w-3xl flex justify-around items-center py-2 px-1">
+            <button onclick="navigateTo('home')" id="nav-home" class="flex flex-col items-center justify-center w-1/4 py-1 text-stone-900 font-medium transition">
+                <i class="fa-solid fa-house text-lg mb-0.5"></i>
+                <span class="text-[11px]">Home</span>
+            </button>
+            <button onclick="navigateTo('catalogue')" id="nav-catalogue" class="flex flex-col items-center justify-center w-1/4 py-1 text-stone-400 font-medium transition">
+                <i class="fa-solid fa-shirt text-lg mb-0.5"></i>
+                <span class="text-[11px]">Catalogue</span>
+            </button>
+            <button onclick="navigateTo('contact')" id="nav-contact" class="flex flex-col items-center justify-center w-1/4 py-1 text-stone-400 font-medium transition">
+                <i class="fa-solid fa-location-dot text-lg mb-0.5"></i>
+                <span class="text-[11px]">Contact</span>
+            </button>
+            <button onclick="navigateTo('reviews')" id="nav-reviews" class="flex flex-col items-center justify-center w-1/4 py-1 text-stone-400 font-medium transition">
+                <i class="fa-regular fa-star text-lg mb-0.5"></i>
+                <span class="text-[11px]">Reviews</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- SEARCH MODAL -->
+    <div id="searchModal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden flex items-start justify-center pt-10 px-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-stone-200 transition-all transform">
+            <div class="p-4 border-b border-stone-100 flex items-center justify-between">
+                <div class="relative flex-grow mr-3">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-stone-400"></i>
+                    <input type="text" id="searchInput" onkeyup="handleSearchInput(event)" placeholder="Search shirt name, code (e.g. TUR-01), color, or size..." class="w-full pl-10 pr-4 py-2.5 bg-stone-100 text-stone-900 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-900">
+                </div>
+                <button onclick="closeSearchModal()" class="text-stone-400 hover:text-stone-800 p-2 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="searchResults" class="max-h-80 overflow-y-auto p-4 divide-y divide-stone-100">
+                <p class="text-center text-stone-400 text-xs py-6">Type product name, code (e.g. TUR-101), color or size to search...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULK ENQUIRY MODAL -->
+    <div id="bulkEnquiryModal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-stone-200">
+            <div class="bg-stone-900 text-white p-4 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-amber-400"></i> Bulk / Wholesale Enquiry
+                    </h3>
+                    <p class="text-xs text-stone-300">Direct query to TUR Garments Shop</p>
+                </div>
+                <button onclick="closeBulkModal()" class="text-stone-300 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="bulkForm" onsubmit="submitBulkEnquiry(event)" class="p-5 space-y-3">
+                <input type="hidden" id="enquiryProductId">
+                <div>
+                    <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Garment Selected</label>
+                    <input type="text" id="enquiryProductName" readonly class="w-full px-3 py-2 bg-stone-100 border border-stone-200 rounded-lg text-sm text-stone-800 font-semibold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Your Name *</label>
+                        <input type="text" id="enquiryCustomerName" required placeholder="Full Name" class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-1 focus:ring-stone-900 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Phone Number *</label>
+                        <input type="tel" id="enquiryCustomerPhone" required placeholder="10-digit Mobile" class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-1 focus:ring-stone-900 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Quantity *</label>
+                        <input type="number" id="enquiryQuantity" min="1" value="20" required class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-1 focus:ring-stone-900 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Size</label>
+                        <select id="enquirySize" class="w-full px-2 py-2 border border-stone-300 rounded-lg text-sm bg-white focus:ring-1 focus:ring-stone-900 outline-none">
+                            <option value="Mixed Sizes">Mixed Sizes</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Colour</label>
+                        <input type="text" id="enquiryColor" placeholder="Any / White" class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-1 focus:ring-stone-900 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Special Request / Message</label>
+                    <textarea id="enquiryMessage" rows="2" placeholder="Ask about wholesale rates, delivery to shop, or stock availability..." class="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-1 focus:ring-stone-900 outline-none"></textarea>
+                </div>
+                <div class="pt-2 flex flex-col gap-2">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-sm transition">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Send Bulk Enquiry via WhatsApp
+                    </button>
+                    <button type="button" onclick="submitBulkEnquiryLocallyOnly()" class="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold py-2 rounded-xl text-xs transition">
+                        Save Enquiry to Shop Only
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- IMAGE LIGHTBOX / ZOOM MODAL -->
+    <div id="imageZoomModal" class="fixed inset-0 z-50 bg-stone-950/90 hidden flex flex-col items-center justify-center p-4">
+        <button onclick="closeZoomModal()" class="absolute top-4 right-4 text-white hover:text-stone-300 text-2xl z-10">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="max-w-3xl max-h-[85vh] w-full flex items-center justify-center">
+            <img id="zoomedImage" src="" alt="Enlarged Garment" class="max-h-[80vh] w-auto object-contain rounded-lg shadow-2xl">
+        </div>
+        <p class="text-stone-400 text-xs mt-3">High Quality Garment Detail View</p>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="adminLoginModal" class="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-stone-200">
+            <div class="bg-stone-900 text-white p-5 text-center">
+                <h3 class="font-serif-brand text-2xl tracking-widest uppercase">TUR</h3>
+                <p class="text-xs text-stone-400 mt-1 uppercase tracking-wider">Owner Dashboard Authentication</p>
+            </div>
+            <form onsubmit="handleAdminLogin(event)" class="p-6 space-y-4">
+                <div id="loginErrorMsg" class="hidden text-xs text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+                    Invalid username or password.
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Admin Username</label>
+                    <input type="text" id="adminUser" required placeholder="Enter username" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-stone-900 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-700 uppercase mb-1">Admin Password</label>
+                    <input type="password" id="adminPass" required placeholder="Enter password" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-stone-900 outline-none">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+                        Log In to Owner Portal
+                    </button>
+                </div>
+                <button type="button" onclick="closeAdminLoginModal()" class="w-full text-center text-xs text-stone-500 hover:text-stone-800 pt-1">
+                    Return to Catalogue
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="fixed top-5 right-5 z-50 bg-stone-900 text-white px-4 py-3 rounded-xl shadow-xl text-xs font-medium transform translate-y-[-100px] opacity-0 transition-all duration-300 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toastMsg">Action completed successfully</span>
+    </div>
+
+    <script>
+        // GLOBAL APP STATE
+        const INITIAL_PRODUCTS = [
+            {
+                id: 'p1',
+                name: "TUR Premium Cotton Oxford Shirt",
+                code: "TUR-101",
+                category: "Men's Shirts",
+                price: 299,
+                available: true,
+                isFeatured: true,
+                isNew: true,
+                fabric: "100% Breathable Combed Cotton",
+                pattern: "Solid Plain",
+                fit: "Regular Custom Fit",
+                description: "Classic full-sleeve button-down Oxford shirt crafted for comfortable daily wear and formal occasions.",
+                sizes: { '32': true, '34': true, '36': true, 'S': true, 'M': true, 'L': true, 'XL': true, 'XXL': false },
+                colors: ["Classic White", "Royal Blue", "Light Grey"],
+                photos: [
+                    "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 'p2',
+                name: "TUR Casual Printed Linen Shirt",
+                code: "TUR-102",
+                category: "Men's Shirts",
+                price: 280,
+                available: true,
+                isFeatured: true,
+                isNew: false,
+                fabric: "Linen Cotton Blend",
+                pattern: "Micro Floral Print",
+                fit: "Slim Fit",
+                description: "Lightweight and stylish casual printed shirt designed for bulk orders and shop display.",
+                sizes: { '32': true, '34': true, '36': true, 'S': true, 'M': true, 'L': true, 'XL': false, 'XXL': false },
+                colors: ["Sky Blue", "Olive Green", "Charcoal"],
+                photos: [
+                    "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 'p3',
+                name: "TUR Kids Smart Checkered Shirt",
+                code: "TUR-K01",
+                category: "Kids' Shirts",
+                price: 250,
+                available: true,
+                isFeatured: true,
+                isNew: true,
+                fabric: "Soft Bio-washed Cotton",
+                pattern: "Yarn-dyed Checks",
+                fit: "Comfort Kids Fit",
+                description: "Durable, skin-friendly soft cotton checks shirt for young boys. Vibrant fast colors.",
+                sizes: { '22': true, '24': true, '26': true, '28': true, '30': true, 'S': true, 'M': false },
+                colors: ["Red & Navy Check", "Yellow & Blue Check"],
+                photos: [
+                    "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 'p4',
+                name: "TUR Formal Micro-Structure Shirt",
+                code: "TUR-103",
+                category: "Men's Shirts",
+                price: 290,
+                available: true,
+                isFeatured: false,
+                isNew: true,
+                fabric: "Wrinkle-resistant Poly Cotton",
+                pattern: "Self Micro Texture",
+                fit: "Regular Fit",
+                description: "Crisp formal shirt designed with easy care fabric. Ideal for office wear and bulk sales.",
+                sizes: { '32': true, '34': true, '36': true, 'S': true, 'M': true, 'L': true, 'XL': true, 'XXL': true },
+                colors: ["Pure White", "Soft Pink", "Navy Blue"],
+                photos: [
+                    "https://images.unsplash.com/photo-1589310243389-96a5483213a8?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 'p5',
+                name: "TUR Kids Festive Silk-Finish Shirt",
+                code: "TUR-K02",
+                category: "Kids' Shirts",
+                price: 270,
+                available: true,
+                isFeatured: false,
+                isNew: false,
+                fabric: "Cotton Satin Satin Finish",
+                pattern: "Solid Shimmer",
+                fit: "Festive Fit",
+                description: "Premium rich-look kids shirt designed for weddings, festivals and special events.",
+                sizes: { '22': true, '24': true, '26': true, '28': true, '30': true },
+                colors: ["Maroon", "Gold", "Royal Cream"],
+                photos: [
+                    "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?auto=format&fit=crop&w=800&q=80"
+                ]
+            }
+        ];
+
+        const INITIAL_REVIEWS = [
+            { id: 'r1', name: "Basavaraj S.", rating: 5, comment: "Bought 50 pieces of Men's Oxford shirts for our local shop stock. High quality finishing and exact sizes!", status: 'approved', date: '12 Aug 2026' },
+            { id: 'r2', name: "Anand Kumar", rating: 5, comment: "TUR Garments offers excellent wholesale prices in Shorapur. The kids check shirts sell very quickly.", status: 'approved', date: '04 Aug 2026' },
+            { id: 'r3', name: "Mohammed Rafiq", rating: 4, comment: "Good cloth material for ₹299. Direct contact on WhatsApp was very convenient.", status: 'approved', date: '28 Jul 2026' }
+        ];
+
+        const INITIAL_SETTINGS = {
+            shopName: "TUR",
+            address: "Tipu Sultan Chowk, Rangampeth, Tq. Shorapur, Karnataka – 585220",
+            phone: "+91 98864 94846",
+            whatsapp: "919886494846",
+            mapsUrl: "https://maps.google.com/?q=Tipu+Sultan+Chowk,+Rangampeth,+Shorapur,+Karnataka+585220",
+            heroTitle: "TUR Garments",
+            heroSubtext: "Men's & Kids' Fine Shirts. Premium Quality at Direct Wholesale Rates.",
+            heroImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+            whatsappMsgTemplate: "Hello TUR, I am interested in {product_name} (Code: {product_code}). Please inform me about stock availability and bulk pricing."
+        };
+
+        // State Store setup with updated default fallback migration
+        let loadedSettings = JSON.parse(localStorage.getItem('tur_settings')) || INITIAL_SETTINGS;
+        if (loadedSettings.whatsapp === "919876543210" || !loadedSettings.whatsapp) {
+            loadedSettings.whatsapp = "919886494846";
+            loadedSettings.phone = "+91 98864 94846";
+            localStorage.setItem('tur_settings', JSON.stringify(loadedSettings));
+        }
+
+        let state = {
+            currentPage: 'home',
+            selectedCategory: 'All',
+            selectedProduct: null,
+            activePhotoIndex: 0,
+            isAdminLoggedIn: false,
+            adminTab: 'dashboard',
+            editingProduct: null,
+            tempPhotos: [], // Temporary store for gallery uploads & URLs in product form
+            // Administrative Credentials stored securely in state logic
+            adminAuth: {
+                username: "TUR",
+                password: "TUR585220"
+            },
+            products: JSON.parse(localStorage.getItem('tur_products')) || INITIAL_PRODUCTS,
+            reviews: JSON.parse(localStorage.getItem('tur_reviews')) || INITIAL_REVIEWS,
+            enquiries: JSON.parse(localStorage.getItem('tur_enquiries')) || [],
+            settings: loadedSettings,
+            filter: {
+                category: 'All',
+                size: 'All',
+                maxPrice: 500,
+                onlyAvailable: false
+            }
+        };
+
+        // Save local state helper
+        function saveStateToStorage() {
+            localStorage.setItem('tur_products', JSON.stringify(state.products));
+            localStorage.setItem('tur_reviews', JSON.stringify(state.reviews));
+            localStorage.setItem('tur_enquiries', JSON.stringify(state.enquiries));
+            localStorage.setItem('tur_settings', JSON.stringify(state.settings));
+        }
+
+        // Check hash routing for admin portal access
+        window.addEventListener('hashchange', checkHashRoute);
+
+        function checkHashRoute() {
+            if (window.location.hash === '#admin') {
+                if (state.isAdminLoggedIn) {
+                    state.currentPage = 'admin';
+                    render();
+                } else {
+                    openAdminLoginModal();
+                }
+            }
+        }
+
+        // Navigation Controller
+        function navigateTo(page, param = null) {
+            state.currentPage = page;
+            if (page === 'product-detail' && param) {
+                state.selectedProduct = param;
+                state.activePhotoIndex = 0;
+            } else if (page === 'catalogue' && param) {
+                state.filter.category = param;
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            render();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = message;
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            }, 3000);
+        }
+
+        // Search Modal Handlers
+        function openSearchModal() {
+            document.getElementById('searchModal').classList.remove('hidden');
+            document.getElementById('searchInput').focus();
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').classList.add('hidden');
+        }
+
+        function handleSearchInput(e) {
+            const query = e.target.value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (!query) {
+                resultsContainer.innerHTML = `<p class="text-center text-stone-400 text-xs py-6">Type product name, code (e.g. TUR-101), color or size to search...</p>`;
+                return;
+            }
+
+            const matches = state.products.filter(p => 
+                p.name.toLowerCase().includes(query) ||
+                p.code.toLowerCase().includes(query) ||
+                p.category.toLowerCase().includes(query) ||
+                p.colors.some(c => c.toLowerCase().includes(query)) ||
+                Object.keys(p.sizes).some(s => s.toLowerCase() === query && p.sizes[s])
+            );
+
+            if (matches.length === 0) {
+                resultsContainer.innerHTML = `<p class="text-center text-stone-500 text-sm py-6">No garments found matching "${query}"</p>`;
+                return;
+            }
+
+            resultsContainer.innerHTML = matches.map(p => `
+                <div onclick="closeSearchModal(); navigateTo('product-detail', state.products.find(x => x.id === '${p.id}'))" class="py-3 flex items-center gap-3 hover:bg-stone-50 cursor-pointer rounded-lg px-2 transition">
+                    <img src="${p.photos[0]}" class="w-12 h-12 object-cover rounded-md border border-stone-200">
+                    <div class="flex-grow">
+                        <h4 class="text-xs font-bold text-stone-900">${p.name}</h4>
+                        <div class="flex items-center gap-2 text-[11px] text-stone-500 mt-0.5">
+                            <span class="font-mono bg-stone-100 px-1.5 py-0.5 rounded">${p.code}</span>
+                            <span>₹${p.price}</span>
+                            <span class="text-amber-700">${p.category}</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-stone-300 text-xs"></i>
+                </div>
+            `).join('');
+        }
+
+        // WhatsApp Direct Link
+        function contactWhatsAppDirect(customMsg = null) {
+            const msg = customMsg || `Hello TUR Garments, I would like to inquire about your available shirt catalogue and wholesale prices.`;
+            const url = `https://wa.me/${state.settings.whatsapp}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        // Direct Call Phone
+        function makeDirectCall() {
+            window.location.href = `tel:${state.settings.phone.replace(/[^0-9+]/g, '')}`;
+        }
+
+        // Bulk Modal Handlers
+        function openBulkModal(product) {
+            document.getElementById('enquiryProductId').value = product.id;
+            document.getElementById('enquiryProductName').value = `${product.name} (${product.code})`;
+            document.getElementById('bulkEnquiryModal').classList.remove('hidden');
+        }
+
+        function closeBulkModal() {
+            document.getElementById('bulkEnquiryModal').classList.add('hidden');
+        }
+
+        function submitBulkEnquiry(e) {
+            e.preventDefault();
+            const name = document.getElementById('enquiryCustomerName').value;
+            const phone = document.getElementById('enquiryCustomerPhone').value;
+            const productInfo = document.getElementById('enquiryProductName').value;
+            const qty = document.getElementById('enquiryQuantity').value;
+            const size = document.getElementById('enquirySize').value;
+            const color = document.getElementById('enquiryColor').value || 'Default';
+            const msg = document.getElementById('enquiryMessage').value;
+
+            // Store in enquiries state
+            const newEnquiry = {
+                id: 'enq_' + Date.now(),
+                customerName: name,
+                customerPhone: phone,
+                product: productInfo,
+                quantity: qty,
+                size: size,
+                color: color,
+                message: msg,
+                date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                status: 'New'
+            };
+            
+            state.enquiries.unshift(newEnquiry);
+            saveStateToStorage();
+
+            // Construct WhatsApp message
+            const waText = `*BULK ENQUIRY - TUR GARMENTS*\n\n` +
+                `*Name:* ${name}\n` +
+                `*Phone:* ${phone}\n` +
+                `*Product:* ${productInfo}\n` +
+                `*Quantity:* ${qty} pcs\n` +
+                `*Preferred Size:* ${size}\n` +
+                `*Colour:* ${color}\n` +
+                `*Note:* ${msg || 'None'}`;
+
+            closeBulkModal();
+            showToast("Bulk enquiry saved! Opening WhatsApp...");
+            contactWhatsAppDirect(waText);
+        }
+
+        function submitBulkEnquiryLocallyOnly() {
+            const name = document.getElementById('enquiryCustomerName').value;
+            const phone = document.getElementById('enquiryCustomerPhone').value;
+            if (!name || !phone) {
+                showToast("Please enter your Name and Phone number");
+                return;
+            }
+            const productInfo = document.getElementById('enquiryProductName').value;
+            const qty = document.getElementById('enquiryQuantity').value;
+            const size = document.getElementById('enquirySize').value;
+            const color = document.getElementById('enquiryColor').value || 'Default';
+            const msg = document.getElementById('enquiryMessage').value;
+
+            state.enquiries.unshift({
+                id: 'enq_' + Date.now(),
+                customerName: name,
+                customerPhone: phone,
+                product: productInfo,
+                quantity: qty,
+                size: size,
+                color: color,
+                message: msg,
+                date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                status: 'New'
+            });
+            saveStateToStorage();
+            closeBulkModal();
+            showToast("Your enquiry has been registered with TUR Garments!");
+        }
+
+        // Image Zoom Lightbox
+        function openZoomModal(imgSrc) {
+            document.getElementById('zoomedImage').src = imgSrc;
+            document.getElementById('imageZoomModal').classList.remove('hidden');
+        }
+
+        function closeZoomModal() {
+            document.getElementById('imageZoomModal').classList.add('hidden');
+        }
+
+        // Admin Security & Portal Handlers
+        function openAdminDashboardDirect() {
+            if (state.isAdminLoggedIn) {
+                navigateTo('admin');
+            } else {
+                openAdminLoginModal();
+            }
+        }
+
+        function openAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('adminUser').value;
+            const p = document.getElementById('adminPass').value;
+
+            if (u === state.adminAuth.username && p === state.adminAuth.password) {
+                state.isAdminLoggedIn = true;
+                closeAdminLoginModal();
+                showToast("Welcome back, Owner!");
+                window.location.hash = 'admin';
+                navigateTo('admin');
+            } else {
+                document.getElementById('loginErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            state.isAdminLoggedIn = false;
+            window.location.hash = '';
+            showToast("Logged out of Owner Dashboard");
+            navigateTo('home');
+        }
+
+        function renderHome() {
+            const featured = state.products.filter(p => p.isFeatured);
+            const newArrivals = state.products.filter(p => p.isNew);
+
+            return `
+                <div class="space-y-6 animate-fadeIn">
+                    <!-- BRAND HERO BANNER -->
+                    <div class="relative rounded-2xl overflow-hidden bg-stone-900 text-white shadow-xl">
+                        <img src="${state.settings.heroImage}" class="w-full h-64 sm:h-80 object-cover opacity-50 hover:scale-105 transition duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent p-6 flex flex-col justify-end">
+                            <span class="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-1">Local & Wholesale Garment Brand</span>
+                            <h1 class="font-serif-brand text-3xl sm:text-4xl font-bold tracking-tight">${state.settings.heroTitle}</h1>
+                            <p class="text-stone-300 text-xs sm:text-sm mt-1.5 max-w-lg leading-relaxed">${state.settings.heroSubtext}</p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button onclick="navigateTo('catalogue')" class="bg-white text-stone-900 hover:bg-stone-100 px-5 py-2.5 rounded-xl font-bold text-xs shadow transition flex items-center gap-2">
+                                    <i class="fa-solid fa-shirt"></i> View Collection
+                                </button>
+                                <button onclick="contactWhatsAppDirect()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow transition flex items-center gap-2">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Shop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TWO PRIMARY CATEGORIES -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-serif-brand text-xl font-bold text-stone-900">Primary Garment Collections</h2>
+                            <span class="text-xs font-semibold text-stone-500">Selected Range</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                            <!-- MEN'S SHIRTS CARD -->
+                            <div onclick="navigateTo('catalogue', 'Men\'s Shirts')" class="group relative rounded-2xl overflow-hidden bg-stone-200 shadow-md cursor-pointer h-44 sm:h-56">
+                                <img src="https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-900/20 to-transparent p-4 flex flex-col justify-end">
+                                    <h3 class="text-white font-bold text-base sm:text-lg">MEN'S SHIRTS</h3>
+                                    <p class="text-stone-300 text-[11px]">Formal & Casual Shirts</p>
+                                    <span class="text-[10px] font-semibold text-amber-300 mt-1 flex items-center gap-1">
+                                        Explore Items <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- KIDS' SHIRTS CARD -->
+                            <div onclick="navigateTo('catalogue', 'Kids\' Shirts')" class="group relative rounded-2xl overflow-hidden bg-stone-200 shadow-md cursor-pointer h-44 sm:h-56">
+                                <img src="https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-900/20 to-transparent p-4 flex flex-col justify-end">
+                                    <h3 class="text-white font-bold text-base sm:text-lg">KIDS' SHIRTS</h3>
+                                    <p class="text-stone-300 text-[11px]">Boys' Festive & Daily</p>
+                                    <span class="text-[10px] font-semibold text-amber-300 mt-1 flex items-center gap-1">
+                                        Explore Items <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FEATURED SHOWCASE GRID -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-serif-brand text-xl font-bold text-stone-900">Featured In Shop</h2>
+                            <button onclick="navigateTo('catalogue')" class="text-xs font-bold text-stone-900 hover:underline">
+                                View All (${state.products.length})
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            ${featured.slice(0, 4).map(p => renderProductCard(p)).join('')}
+                        </div>
+                    </div>
+
+                    <!-- SHOP INFO BANNER -->
+                    <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="text-xs font-bold text-stone-900 uppercase tracking-wide">TUR Garments Shop Location</h4>
+                            <p class="text-xs text-stone-600 mt-0.5 line-clamp-2">${state.settings.address}</p>
+                            <button onclick="navigateTo('contact')" class="text-[11px] font-bold text-stone-900 underline mt-1">Get Store Directions & Map</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCatalogue() {
+            let filtered = state.products.filter(p => {
+                if (state.filter.category !== 'All' && p.category !== state.filter.category) return false;
+                if (state.filter.size !== 'All' && !p.sizes[state.filter.size]) return false;
+                if (p.price > state.filter.maxPrice) return false;
+                if (state.filter.onlyAvailable && !p.available) return false;
+                return true;
+            });
+
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <!-- CATALOGUE HEADER & FILTERS -->
+                    <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h1 class="font-serif-brand text-xl font-bold text-stone-900">Garment Catalogue</h1>
+                            <span class="text-xs text-stone-500 font-semibold">${filtered.length} Items Listed</span>
+                        </div>
+
+                        <!-- CATEGORY PILLS -->
+                        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                            <button onclick="setCategoryFilter('All')" class="px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${state.filter.category === 'All' ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}">
+                                All Garments
+                            </button>
+                            <button onclick="setCategoryFilter('Men\'s Shirts')" class="px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${state.filter.category === "Men's Shirts" ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}">
+                                Men's Shirts
+                            </button>
+                            <button onclick="setCategoryFilter('Kids\' Shirts')" class="px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${state.filter.category === "Kids' Shirts" ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}">
+                                Kids' Shirts
+                            </button>
+                        </div>
+
+                        <!-- ADVANCED FILTER TOGGLES -->
+                        <div class="pt-2 border-t border-stone-100 grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold text-stone-500 mb-1">Filter by Size</label>
+                                <select onchange="setSizeFilter(this.value)" class="w-full bg-stone-100 border border-stone-200 rounded-lg p-1.5 text-xs text-stone-800 outline-none">
+                                    <option value="All" ${state.filter.size === 'All' ? 'selected' : ''}>All Sizes</option>
+                                    <option value="32">32</option>
+                                    <option value="34">34</option>
+                                    <option value="36">36</option>
+                                    <option value="S">S</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                    <option value="XL">XL</option>
+                                    <option value="XXL">XXL</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold text-stone-500 mb-1">Max Price: ₹${state.filter.maxPrice}</label>
+                                <input type="range" min="200" max="500" step="10" value="${state.filter.maxPrice}" oninput="setMaxPriceFilter(this.value)" class="w-full accent-stone-900">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCT CATALOGUE GRID -->
+                    ${filtered.length === 0 ? `
+                        <div class="text-center py-12 bg-white rounded-2xl border border-stone-200">
+                            <i class="fa-solid fa-shirt text-stone-300 text-4xl mb-2"></i>
+                            <p class="text-sm font-semibold text-stone-700">No garments match selected filter.</p>
+                            <button onclick="resetFilters()" class="mt-3 text-xs text-amber-700 font-bold underline">Reset Filters</button>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                            ${filtered.map(p => renderProductCard(p)).join('')}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function setCategoryFilter(cat) {
+            state.filter.category = cat;
+            render();
+        }
+
+        function setSizeFilter(size) {
+            state.filter.size = size;
+            render();
+        }
+
+        function setMaxPriceFilter(val) {
+            state.filter.maxPrice = parseInt(val);
+            render();
+        }
+
+        function resetFilters() {
+            state.filter = { category: 'All', size: 'All', maxPrice: 500, onlyAvailable: false };
+            render();
+        }
+
+        function renderProductCard(product) {
+            const availSizes = Object.keys(product.sizes).filter(s => product.sizes[s]);
+
+            return `
+                <div onclick="navigateTo('product-detail', state.products.find(p => p.id === '${product.id}'))" class="group bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+                    <div class="relative aspect-[4/5] bg-stone-100 overflow-hidden">
+                        <img src="${product.photos[0]}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        
+                        <!-- BADGES -->
+                        <div class="absolute top-2 left-2 flex flex-col gap-1">
+                            ${!product.available ? `<span class="bg-rose-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Out of Stock</span>` : ''}
+                            ${product.isNew ? `<span class="bg-stone-900 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">New</span>` : ''}
+                        </div>
+                        <span class="absolute bottom-2 right-2 bg-stone-900/80 backdrop-blur-md text-white font-mono text-[10px] px-1.5 py-0.5 rounded">
+                            ${product.code}
+                        </span>
+                    </div>
+
+                    <div class="p-3 flex flex-col flex-grow justify-between">
+                        <div>
+                            <span class="text-[10px] text-stone-400 font-semibold uppercase tracking-wider">${product.category}</span>
+                            <h3 class="text-xs font-bold text-stone-900 line-clamp-1 mt-0.5">${product.name}</h3>
+                            <div class="mt-1 flex items-baseline gap-1.5">
+                                <span class="text-sm font-bold text-stone-900">₹${product.price}</span>
+                                <span class="text-[10px] text-stone-400">approx wholesale</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[10px] text-stone-500">
+                            <span class="line-clamp-1 font-medium">
+                                Sizes: ${availSizes.slice(0, 4).join(', ')}${availSizes.length > 4 ? '+' : ''}
+                            </span>
+                            <span class="text-stone-900 font-bold group-hover:translate-x-0.5 transition">Details <i class="fa-solid fa-chevron-right text-[8px]"></i></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductDetail() {
+            const product = state.selectedProduct;
+            if (!product) return renderCatalogue();
+
+            const currentPhoto = product.photos[state.activePhotoIndex] || product.photos[0];
+            const sizeKeys = ['32', '34', '36', 'S', 'M', 'L', 'XL', 'XXL'];
+
+            // Prepare WhatsApp inquire text
+            const waMsg = state.settings.whatsappMsgTemplate
+                .replace('{product_name}', product.name)
+                .replace('{product_code}', product.code);
+
+            return `
+                <div class="space-y-5 animate-fadeIn">
+                    <!-- BACK BUTTON BAR -->
+                    <div class="flex items-center justify-between">
+                        <button onclick="navigateTo('catalogue')" class="flex items-center gap-1.5 text-xs font-bold text-stone-700 bg-white border border-stone-200 px-3 py-1.5 rounded-xl shadow-sm hover:bg-stone-50">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Catalogue
+                        </button>
+                        <span class="text-xs font-mono bg-stone-200 text-stone-800 px-2 py-0.5 rounded font-bold">${product.code}</span>
+                    </div>
+
+                    <!-- MAIN PHOTO GALLERY -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-3 shadow-sm space-y-3">
+                        <div class="relative aspect-[4/5] bg-stone-100 rounded-xl overflow-hidden zoom-img-container" onclick="openZoomModal('${currentPhoto}')">
+                            <img id="mainDetailImg" src="${currentPhoto}" class="w-full h-full object-cover">
+                            <div class="absolute bottom-3 right-3 bg-stone-900/70 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> Tap to Zoom
+                            </div>
+                        </div>
+
+                        <!-- THUMBNAILS -->
+                        ${product.photos.length > 1 ? `
+                            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                                ${product.photos.map((ph, idx) => `
+                                    <button onclick="state.activePhotoIndex=${idx}; render();" class="w-16 h-16 rounded-lg overflow-hidden border-2 transition ${state.activePhotoIndex === idx ? 'border-stone-900 scale-95' : 'border-stone-200 opacity-60'}">
+                                        <img src="${ph}" class="w-full h-full object-cover">
+                                    </button>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- GARMENT TITLE & PRICE CARD -->
+                    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+                        <div>
+                            <span class="text-xs font-bold text-amber-700 uppercase tracking-widest">${product.category}</span>
+                            <h1 class="text-xl font-bold text-stone-900 mt-0.5">${product.name}</h1>
+                        </div>
+
+                        <div class="flex items-baseline gap-2 pb-3 border-b border-stone-100">
+                            <span class="text-2xl font-extrabold text-stone-900">₹${product.price}</span>
+                            <span class="text-xs text-stone-500">per piece (Wholesale editable)</span>
+                            ${product.available ? 
+                                `<span class="ml-auto text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">In Stock</span>` :
+                                `<span class="ml-auto text-[10px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">Unavailable</span>`
+                            }
+                        </div>
+
+                        <!-- SIZE SYSTEM MATRIX -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-bold uppercase text-stone-700">Available Sizes Matrix</label>
+                                <span class="text-[10px] text-stone-400">✓ In Stock | ✕ Out</span>
+                            </div>
+                            <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                                ${sizeKeys.map(sz => {
+                                    const isAvail = product.sizes[sz];
+                                    return `
+                                        <div class="flex flex-col items-center justify-center py-2 rounded-xl border ${isAvail ? 'bg-stone-900 text-white border-stone-900' : 'bg-stone-50 text-stone-300 border-stone-200 opacity-50'}">
+                                            <span class="text-xs font-bold">${sz}</span>
+                                            <span class="text-[9px] mt-0.5">${isAvail ? '✓' : '✕'}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- COLOUR SWATCHES -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-stone-700 mb-2">Available Colour Variations</label>
+                            <div class="flex flex-wrap gap-2">
+                                ${product.colors.map(col => `
+                                    <span class="text-xs bg-stone-100 border border-stone-200 text-stone-800 px-3 py-1 rounded-full font-medium flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-stone-800"></span> ${col}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- SPECIFICATIONS TABLE -->
+                        <div class="pt-3 border-t border-stone-100 text-xs space-y-2">
+                            <div class="grid grid-cols-2">
+                                <span class="text-stone-500">Fabric Material:</span>
+                                <span class="font-semibold text-stone-800">${product.fabric}</span>
+                            </div>
+                            <div class="grid grid-cols-2">
+                                <span class="text-stone-500">Pattern / Style:</span>
+                                <span class="font-semibold text-stone-800">${product.pattern}</span>
+                            </div>
+                            <div class="grid grid-cols-2">
+                                <span class="text-stone-500">Garment Fit:</span>
+                                <span class="font-semibold text-stone-800">${product.fit}</span>
+                            </div>
+                        </div>
+
+                        <!-- SHORT DESCRIPTION -->
+                        <p class="text-xs text-stone-600 pt-2 border-t border-stone-100 leading-relaxed">
+                            ${product.description}
+                        </p>
+                    </div>
+
+                    <!-- DIRECT CONTACT ACTIONS -->
+                    <div class="bg-stone-900 text-white p-5 rounded-2xl shadow-xl space-y-3">
+                        <div class="text-center">
+                            <h3 class="text-sm font-bold">Interested in purchasing or bulk enquiry?</h3>
+                            <p class="text-xs text-stone-400 mt-0.5">Contact TUR Garments directly to confirm stock and pricing.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <button onclick="contactWhatsAppDirect('${waMsg}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow transition">
+                                <i class="fa-brands fa-whatsapp text-lg"></i> Ask on WhatsApp
+                            </button>
+                            <button onclick="openBulkModal(state.selectedProduct)" class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow transition">
+                                <i class="fa-solid fa-boxes-packing text-sm"></i> Submit Bulk Enquiry
+                            </button>
+                        </div>
+                        <button onclick="makeDirectCall()" class="w-full bg-stone-800 hover:bg-stone-700 text-stone-200 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-phone text-xs"></i> Call Shop: ${state.settings.phone}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderContact() {
+            return `
+                <div class="space-y-5 animate-fadeIn">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm text-center space-y-4">
+                        <div class="w-16 h-16 bg-stone-900 text-white rounded-full flex items-center justify-center mx-auto text-2xl font-serif-brand">
+                            TUR
+                        </div>
+                        <div>
+                            <h1 class="font-serif-brand text-2xl font-bold text-stone-900">TUR Garments</h1>
+                            <p class="text-xs text-amber-700 font-semibold uppercase tracking-wider mt-0.5">Independent Garment Brand & Shop</p>
+                        </div>
+
+                        <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 text-left space-y-2">
+                            <div class="flex items-start gap-3">
+                                <i class="fa-solid fa-location-dot text-stone-900 mt-1"></i>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase">Shop Address</h4>
+                                    <p class="text-xs text-stone-600 leading-relaxed mt-0.5">${state.settings.address}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DIRECT CONTACT BUTTONS -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <button onclick="contactWhatsAppDirect()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow transition">
+                                <i class="fa-brands fa-whatsapp text-lg"></i> Chat on WhatsApp
+                            </button>
+                            <button onclick="makeDirectCall()" class="w-full bg-stone-900 hover:bg-stone-800 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow transition">
+                                <i class="fa-solid fa-phone"></i> Call Shop
+                            </button>
+                        </div>
+
+                        <a href="${state.settings.mapsUrl}" target="_blank" class="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border border-stone-200 transition inline-block">
+                            <i class="fa-solid fa-map-location-dot text-amber-700 text-sm"></i> Get Directions on Google Maps
+                        </a>
+                    </div>
+
+                    <!-- GOOGLE MAPS EMBEDDED PLACEHOLDER CARD -->
+                    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden p-4 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-stone-700">Location Map Preview</h3>
+                        <div class="w-full h-48 bg-stone-200 rounded-xl flex flex-col items-center justify-center text-stone-500 relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover opacity-60">
+                            <div class="absolute inset-0 bg-stone-900/40 flex flex-col items-center justify-center p-4 text-center text-white">
+                                <i class="fa-solid fa-location-pin text-rose-500 text-3xl mb-1"></i>
+                                <span class="font-bold text-sm">Tipu Sultan Chowk, Rangampeth</span>
+                                <span class="text-xs text-stone-200">Shorapur, Karnataka – 585220</span>
+                                <a href="${state.settings.mapsUrl}" target="_blank" class="mt-2 bg-white text-stone-900 text-[10px] font-bold px-3 py-1.5 rounded-full shadow">Open Live Navigation</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReviews() {
+            const approved = state.reviews.filter(r => r.status === 'approved');
+
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <h1 class="font-serif-brand text-xl font-bold text-stone-900">Customer Feedback</h1>
+                            <p class="text-xs text-stone-500">Verified buyer experiences at TUR Garments</p>
+                        </div>
+                        <button onclick="openAddReviewModal()" class="bg-stone-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow hover:bg-stone-800 transition">
+                            <i class="fa-solid fa-pen text-xs mr-1"></i> Leave Review
+                        </button>
+                    </div>
+
+                    <!-- REVIEWS LIST -->
+                    <div class="space-y-3">
+                        ${approved.length === 0 ? `
+                            <p class="text-center text-stone-400 text-xs py-8">No customer reviews published yet.</p>
+                        ` : approved.map(r => `
+                            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-stone-900">${r.name}</span>
+                                    <span class="text-[10px] text-stone-400">${r.date}</span>
+                                </div>
+                                <div class="flex text-amber-400 text-xs gap-1">
+                                    ${Array.from({length: 5}).map((_, i) => `
+                                        <i class="fa-${i < r.rating ? 'solid' : 'regular'} fa-star"></i>
+                                    `).join('')}
+                                </div>
+                                <p class="text-xs text-stone-700 leading-relaxed">${r.comment}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- SUBMIT REVIEW FORM CARD -->
+                    <div id="addReviewBox" class="hidden bg-white p-5 rounded-2xl border border-stone-200 shadow-md space-y-3">
+                        <h3 class="text-sm font-bold text-stone-900">Write a Customer Review</h3>
+                        <form onsubmit="submitCustomerReview(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-stone-700 mb-1">Your Name</label>
+                                <input type="text" id="revName" required class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-stone-700 mb-1">Rating (1 to 5 Stars)</label>
+                                <select id="revRating" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white outline-none">
+                                    <option value="5">⭐⭐⭐⭐⭐ (5/5 Excellent)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4/5 Very Good)</option>
+                                    <option value="3">⭐⭐⭐ (3/5 Average)</option>
+                                    <option value="2">⭐⭐ (2/5 Below Average)</option>
+                                    <option value="1">⭐ (1/5 Poor)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-stone-700 mb-1">Review Comment</label>
+                                <textarea id="revComment" required rows="3" placeholder="Share your feedback regarding garment quality, sizes, or service..." class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm outline-none"></textarea>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" class="flex-grow bg-stone-900 text-white font-bold py-2 rounded-xl text-xs">Submit Review for Approval</button>
+                                <button type="button" onclick="closeAddReviewModal()" class="bg-stone-100 text-stone-700 font-bold px-4 py-2 rounded-xl text-xs">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openAddReviewModal() {
+            document.getElementById('addReviewBox').classList.remove('hidden');
+        }
+
+        function closeAddReviewModal() {
+            document.getElementById('addReviewBox').classList.add('hidden');
+        }
+
+        function submitCustomerReview(e) {
+            e.preventDefault();
+            const name = document.getElementById('revName').value;
+            const rating = parseInt(document.getElementById('revRating').value);
+            const comment = document.getElementById('revComment').value;
+
+            state.reviews.unshift({
+                id: 'r_' + Date.now(),
+                name: name,
+                rating: rating,
+                comment: comment,
+                status: 'pending',
+                date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+            });
+
+            saveStateToStorage();
+            closeAddReviewModal();
+            showToast("Review submitted! Pending owner moderation.");
+            render();
+        }
+
+        function renderAdminDashboard() {
+            if (!state.isAdminLoggedIn) {
+                openAdminLoginModal();
+                return renderHome();
+            }
+
+            const totalProds = state.products.length;
+            const mensCount = state.products.filter(p => p.category === "Men's Shirts").length;
+            const kidsCount = state.products.filter(p => p.category === "Kids' Shirts").length;
+            const newEnquiriesCount = state.enquiries.filter(e => e.status === 'New').length;
+
+            return `
+                <div class="space-y-5 animate-fadeIn">
+                    <!-- ADMIN TOP HEADER BAR -->
+                    <div class="bg-stone-900 text-white p-5 rounded-2xl shadow-xl flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Owner Portal</span>
+                            <h1 class="font-serif-brand text-2xl font-bold">TUR Management</h1>
+                        </div>
+                        <button onclick="logoutAdmin()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </button>
+                    </div>
+
+                    <!-- ADMIN TAB NAVIGATION -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-stone-200">
+                        <button onclick="setAdminTab('dashboard')" class="px-4 py-2 font-bold text-xs rounded-xl transition ${state.adminTab === 'dashboard' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 hover:bg-stone-100'}">
+                            Dashboard
+                        </button>
+                        <button onclick="setAdminTab('products')" class="px-4 py-2 font-bold text-xs rounded-xl transition ${state.adminTab === 'products' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 hover:bg-stone-100'}">
+                            Products (${totalProds})
+                        </button>
+                        <button onclick="setAdminTab('enquiries')" class="px-4 py-2 font-bold text-xs rounded-xl transition ${state.adminTab === 'enquiries' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 hover:bg-stone-100'}">
+                            Enquiries (${newEnquiriesCount})
+                        </button>
+                        <button onclick="setAdminTab('reviews')" class="px-4 py-2 font-bold text-xs rounded-xl transition ${state.adminTab === 'reviews' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 hover:bg-stone-100'}">
+                            Reviews (${state.reviews.length})
+                        </button>
+                        <button onclick="setAdminTab('settings')" class="px-4 py-2 font-bold text-xs rounded-xl transition ${state.adminTab === 'settings' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 hover:bg-stone-100'}">
+                            Settings
+                        </button>
+                    </div>
+
+                    <!-- ADMIN TAB CONTENTS -->
+                    ${renderAdminTabContent()}
+                </div>
+            `;
+        }
+
+        function setAdminTab(tab) {
+            state.adminTab = tab;
+            render();
+        }
+
+        function renderAdminTabContent() {
+            if (state.adminTab === 'dashboard') {
+                return `
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+                                <span class="text-[10px] text-stone-500 uppercase font-bold">Total Garments</span>
+                                <h3 class="text-2xl font-extrabold text-stone-900 mt-1">${state.products.length}</h3>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+                                <span class="text-[10px] text-stone-500 uppercase font-bold">Men's Shirts</span>
+                                <h3 class="text-2xl font-extrabold text-stone-900 mt-1">${state.products.filter(p => p.category === "Men's Shirts").length}</h3>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+                                <span class="text-[10px] text-stone-500 uppercase font-bold">Kids' Shirts</span>
+                                <h3 class="text-2xl font-extrabold text-stone-900 mt-1">${state.products.filter(p => p.category === "Kids' Shirts").length}</h3>
+                            </div>
+                            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 shadow-sm">
+                                <span class="text-[10px] text-amber-800 uppercase font-bold">New Enquiries</span>
+                                <h3 class="text-2xl font-extrabold text-amber-900 mt-1">${state.enquiries.filter(e => e.status === 'New').length}</h3>
+                            </div>
+                        </div>
+
+                        <!-- QUICK PRODUCT MANAGEMENT CALLOUT -->
+                        <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <h3 class="text-sm font-bold text-stone-900">Manage Garment Catalogue</h3>
+                                <p class="text-xs text-stone-500 mt-0.5">Add new shirts, update prices, toggle availability or sizes.</p>
+                            </div>
+                            <button onclick="openProductForm()" class="bg-stone-900 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+                                + Add Garment
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (state.adminTab === 'products') {
+                return `
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-stone-900">Garment Inventory</h3>
+                            <button onclick="openProductForm()" class="bg-stone-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow">
+                                + Add New Garment
+                            </button>
+                        </div>
+
+                        <!-- PRODUCT EDITOR MODAL / FORM INLINE -->
+                        <div id="productFormBox" class="hidden bg-white p-5 rounded-2xl border border-stone-200 shadow-md space-y-4">
+                            <h3 id="formTitle" class="text-sm font-bold text-stone-900">Add New Garment</h3>
+                            <form onsubmit="saveProductForm(event)" class="space-y-3">
+                                <input type="hidden" id="editProdId">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Garment Name *</label>
+                                        <input type="text" id="pName" required placeholder="TUR Cotton Shirt" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Product Code *</label>
+                                        <input type="text" id="pCode" required placeholder="TUR-105" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Category *</label>
+                                        <select id="pCategory" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white">
+                                            <option value="Men's Shirts">Men's Shirts</option>
+                                            <option value="Kids' Shirts">Kids' Shirts</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Wholesale Price (₹) *</label>
+                                        <input type="number" id="pPrice" required value="299" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2 bg-stone-50 p-3 rounded-xl border border-stone-200">
+                                    <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider">Garment Photos *</label>
+                                    
+                                    <div class="flex flex-wrap gap-2 items-center">
+                                        <!-- Hidden Gallery File Input & Action Button -->
+                                        <input type="file" id="pGalleryInput" accept="image/*" multiple onchange="handleGalleryUpload(event)" class="hidden">
+                                        <button type="button" onclick="document.getElementById('pGalleryInput').click()" class="bg-stone-900 hover:bg-stone-800 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+                                            <i class="fa-solid fa-images text-amber-400"></i> Select from Device Gallery
+                                        </button>
+                                        <span class="text-[11px] text-stone-400 font-medium">or web URL:</span>
+                                    </div>
+
+                                    <!-- Web URL Input Row -->
+                                    <div class="flex gap-2">
+                                        <input type="text" id="pUrlInput" placeholder="https://example.com/shirt.jpg" class="flex-grow px-3 py-1.5 border border-stone-300 rounded-xl text-xs outline-none">
+                                        <button type="button" onclick="addUrlPhoto()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-semibold transition">
+                                            Add URL
+                                        </button>
+                                    </div>
+
+                                    <!-- Selected Photos Thumbnail Strip -->
+                                    <div id="photoPreviewsContainer" class="flex items-center gap-2 overflow-x-auto pt-2 min-h-[64px]">
+                                        <!-- Dynamically populated via renderPhotoPreviews() -->
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-stone-700 mb-1">Available Colours (comma separated)</label>
+                                    <input type="text" id="pColors" placeholder="White, Blue, Black" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Fabric</label>
+                                        <input type="text" id="pFabric" placeholder="Combed Cotton" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Pattern</label>
+                                        <input type="text" id="pPattern" placeholder="Solid Plain" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Fit</label>
+                                        <input type="text" id="pFit" placeholder="Regular Fit" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-stone-700 mb-1">Size Availability</label>
+                                    <div class="grid grid-cols-4 gap-2 text-xs">
+                                        ${['32','34','36','S','M','L','XL','XXL'].map(sz => `
+                                            <label class="flex items-center gap-1">
+                                                <input type="checkbox" id="sz_${sz}" class="accent-stone-900" checked> ${sz}
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-stone-700 mb-1">Description</label>
+                                    <textarea id="pDesc" rows="2" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"></textarea>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="bg-stone-900 text-white font-bold py-2 px-4 rounded-xl text-xs">Save Garment</button>
+                                    <button type="button" onclick="closeProductForm()" class="bg-stone-100 text-stone-700 font-bold py-2 px-4 rounded-xl text-xs">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- PRODUCT LIST TABLE -->
+                        <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                            <div class="divide-y divide-stone-100">
+                                ${state.products.map(p => `
+                                    <div class="p-4 flex items-center justify-between gap-3">
+                                        <img src="${p.photos[0]}" class="w-12 h-12 object-cover rounded-lg border border-stone-200 flex-shrink-0">
+                                        <div class="flex-grow">
+                                            <h4 class="text-xs font-bold text-stone-900">${p.name}</h4>
+                                            <div class="flex items-center gap-2 text-[11px] text-stone-500 mt-0.5">
+                                                <span class="font-mono bg-stone-100 px-1 py-0.5 rounded text-stone-800 font-bold">${p.code}</span>
+                                                <span>₹${p.price}</span>
+                                                <span class="text-amber-800">${p.category}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <button onclick="editProduct('${p.id}')" class="p-2 text-stone-600 hover:text-stone-900 text-xs" title="Edit">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button onclick="deleteProduct('${p.id}')" class="p-2 text-rose-600 hover:text-rose-900 text-xs" title="Delete">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (state.adminTab === 'enquiries') {
+                return `
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-stone-900">Wholesale Customer Enquiries</h3>
+                        ${state.enquiries.length === 0 ? `
+                            <p class="text-center text-stone-400 text-xs py-8">No wholesale enquiries logged yet.</p>
+                        ` : state.enquiries.map(e => `
+                            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-stone-900">${e.customerName} (${e.customerPhone})</span>
+                                    <select onchange="updateEnquiryStatus('${e.id}', this.value)" class="text-[10px] font-bold px-2 py-0.5 rounded border border-stone-300 bg-white">
+                                        <option value="New" ${e.status === 'New' ? 'selected' : ''}>Status: New</option>
+                                        <option value="Contacted" ${e.status === 'Contacted' ? 'selected' : ''}>Status: Contacted</option>
+                                        <option value="Completed" ${e.status === 'Completed' ? 'selected' : ''}>Status: Completed</option>
+                                    </select>
+                                </div>
+                                <p class="text-xs text-stone-800 font-semibold">${e.product}</p>
+                                <div class="grid grid-cols-3 gap-1 text-[11px] text-stone-500 bg-stone-50 p-2 rounded-lg">
+                                    <span>Qty: <b>${e.quantity} pcs</b></span>
+                                    <span>Size: <b>${e.size}</b></span>
+                                    <span>Color: <b>${e.color}</b></span>
+                                </div>
+                                ${e.message ? `<p class="text-xs text-stone-600 italic">"${e.message}"</p>` : ''}
+                                <span class="text-[10px] text-stone-400 block">${e.date}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (state.adminTab === 'reviews') {
+                return `
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-stone-900">Review Moderation</h3>
+                        ${state.reviews.map(r => `
+                            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-stone-900">${r.name}</span>
+                                    <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${r.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${r.status}</span>
+                                </div>
+                                <p class="text-xs text-stone-700">${r.comment}</p>
+                                <div class="flex gap-2 pt-1">
+                                    <button onclick="toggleReviewStatus('${r.id}', 'approved')" class="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">Approve</button>
+                                    <button onclick="toggleReviewStatus('${r.id}', 'hidden')" class="bg-stone-200 text-stone-800 text-[10px] font-bold px-2.5 py-1 rounded-lg">Hide</button>
+                                    <button onclick="deleteReview('${r.id}')" class="bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">Delete</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (state.adminTab === 'settings') {
+                return `
+                    <div class="space-y-4">
+                        <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+                            <h3 class="text-sm font-bold text-stone-900">Shop Contact Details & Settings</h3>
+                            <form onsubmit="saveShopSettings(event)" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-stone-700 mb-1">Shop Address</label>
+                                    <input type="text" id="setAddress" value="${state.settings.address}" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">Phone Number</label>
+                                        <input type="text" id="setPhone" value="${state.settings.phone}" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-stone-700 mb-1">WhatsApp Number</label>
+                                        <input type="text" id="setWhatsapp" value="${state.settings.whatsapp}" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-stone-700 mb-1">Hero Subtext Slogan</label>
+                                    <input type="text" id="setHeroSubtext" value="${state.settings.heroSubtext}" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                </div>
+                                <button type="submit" class="bg-stone-900 text-white font-bold py-2 px-4 rounded-xl text-xs">Update Settings</button>
+                            </form>
+                        </div>
+
+                        <!-- CHANGE ADMIN PASSWORD -->
+                        <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+                            <h3 class="text-sm font-bold text-stone-900">Security Credentials</h3>
+                            <form onsubmit="changeAdminCredentials(event)" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-stone-700 mb-1">Admin Username</label>
+                                    <input type="text" id="chgUser" value="${state.adminAuth.username}" required class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-stone-700 mb-1">New Admin Password</label>
+                                    <input type="password" id="chgPass" placeholder="Enter new password" required class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm">
+                                </div>
+                                <button type="submit" class="bg-stone-900 text-white font-bold py-2 px-4 rounded-xl text-xs">Update Credentials</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function openProductForm() {
+            // Ensure we are on the products tab where the form DOM exists
+            if (state.adminTab !== 'products') {
+                state.adminTab = 'products';
+                render();
+            }
+
+            const formBox = document.getElementById('productFormBox');
+            if (!formBox) return;
+
+            formBox.classList.remove('hidden');
+
+            state.tempPhotos = [];
+
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+
+            setVal('editProdId', '');
+            setVal('pName', '');
+            setVal('pCode', '');
+            setVal('pPrice', '299');
+            setVal('pColors', '');
+            setVal('pFabric', '');
+            setVal('pPattern', '');
+            setVal('pFit', '');
+            setVal('pDesc', '');
+
+            const titleEl = document.getElementById('formTitle');
+            if (titleEl) titleEl.innerText = 'Add New Garment';
+
+            ['32','34','36','S','M','L','XL','XXL'].forEach(sz => {
+                const el = document.getElementById(`sz_${sz}`);
+                if (el) el.checked = true;
+            });
+
+            renderPhotoPreviews();
+        }
+
+        function closeProductForm() {
+            const formBox = document.getElementById('productFormBox');
+            if (formBox) formBox.classList.add('hidden');
+        }
+
+        function handleGalleryUpload(e) {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    compressAndAddImage(evt.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+            // Clear input so duplicate selections can be triggered if needed
+            e.target.value = '';
+        }
+
+        function compressAndAddImage(dataUrl, maxDim = 800, quality = 0.75) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    }
+                } else {
+                    if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const compressed = canvas.toDataURL('image/jpeg', quality);
+                state.tempPhotos.push(compressed);
+                renderPhotoPreviews();
+            };
+            img.src = dataUrl;
+        }
+
+        function addUrlPhoto() {
+            const input = document.getElementById('pUrlInput');
+            if (!input) return;
+            const url = input.value.trim();
+            if (url) {
+                state.tempPhotos.push(url);
+                input.value = '';
+                renderPhotoPreviews();
+            } else {
+                showToast("Please enter a valid image URL");
+            }
+        }
+
+        function removeTempPhoto(idx) {
+            state.tempPhotos.splice(idx, 1);
+            renderPhotoPreviews();
+        }
+
+        function renderPhotoPreviews() {
+            const container = document.getElementById('photoPreviewsContainer');
+            if (!container) return;
+
+            if (state.tempPhotos.length === 0) {
+                container.innerHTML = `<span class="text-[11px] text-stone-400 italic py-2">No photos added yet. Select photos from gallery or add a web URL.</span>`;
+                return;
+            }
+
+            container.innerHTML = state.tempPhotos.map((photo, idx) => `
+                <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-stone-300 flex-shrink-0 group">
+                    <img src="${photo}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeTempPhoto(${idx})" class="absolute top-0.5 right-0.5 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow hover:bg-rose-700 transition" title="Remove Photo">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <span class="absolute bottom-0 left-0 right-0 bg-stone-900/60 text-white text-[8px] text-center">${idx + 1}</span>
+                </div>
+            `).join('');
+        }
+
+        function saveProductForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('editProdId').value || 'p_' + Date.now();
+            const name = document.getElementById('pName').value;
+            const code = document.getElementById('pCode').value;
+            const category = document.getElementById('pCategory').value;
+            const price = parseFloat(document.getElementById('pPrice').value);
+            
+            // Collect photos from device gallery & URLs
+            let photos = [...state.tempPhotos];
+            if (photos.length === 0) {
+                photos = ["https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80"];
+                showToast("Default image used (no photos attached)");
+            }
+
+            const colors = document.getElementById('pColors').value.split(',').map(s => s.trim()).filter(Boolean);
+            const fabric = document.getElementById('pFabric').value || '100% Cotton';
+            const pattern = document.getElementById('pPattern').value || 'Plain';
+            const fit = document.getElementById('pFit').value || 'Regular Fit';
+            const desc = document.getElementById('pDesc').value;
+
+            const sizesObj = {};
+            ['32','34','36','S','M','L','XL','XXL'].forEach(sz => {
+                sizesObj[sz] = document.getElementById(`sz_${sz}`).checked;
+            });
+
+            const newProd = {
+                id, name, code, category, price, available: true, isFeatured: true, isNew: true,
+                fabric, pattern, fit, description: desc, sizes: sizesObj, colors, photos
+            };
+
+            const existingIdx = state.products.findIndex(p => p.id === id);
+            if (existingIdx >= 0) {
+                state.products[existingIdx] = newProd;
+            } else {
+                state.products.unshift(newProd);
+            }
+
+            saveStateToStorage();
+            closeProductForm();
+            showToast("Garment saved successfully!");
+            render();
+        }
+
+        function editProduct(id) {
+            const prod = state.products.find(p => p.id === id);
+            if (!prod) return;
+            openProductForm();
+
+            const titleEl = document.getElementById('formTitle');
+            if (titleEl) titleEl.innerText = `Edit Garment (${prod.code})`;
+
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+
+            state.tempPhotos = Array.isArray(prod.photos) ? [...prod.photos] : [];
+
+            setVal('editProdId', prod.id);
+            setVal('pName', prod.name);
+            setVal('pCode', prod.code);
+            setVal('pCategory', prod.category);
+            setVal('pPrice', prod.price);
+            setVal('pColors', (prod.colors || []).join(', '));
+            setVal('pFabric', prod.fabric || '');
+            setVal('pPattern', prod.pattern || '');
+            setVal('pFit', prod.fit || '');
+            setVal('pDesc', prod.description || '');
+
+            ['32','34','36','S','M','L','XL','XXL'].forEach(sz => {
+                const el = document.getElementById(`sz_${sz}`);
+                if (el) el.checked = !!(prod.sizes && prod.sizes[sz]);
+            });
+
+            renderPhotoPreviews();
+        }
+
+        function closeProductForm() {
+            const formBox = document.getElementById('productFormBox');
+            if (formBox) formBox.classList.add('hidden');
+        }
+
+        function saveProductForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('editProdId').value || 'p_' + Date.now();
+            const name = document.getElementById('pName').value;
+            const code = document.getElementById('pCode').value;
+            const category = document.getElementById('pCategory').value;
+            const price = parseFloat(document.getElementById('pPrice').value);
+            const photos = document.getElementById('pPhotos').value.split(',').map(s => s.trim()).filter(Boolean);
+            const colors = document.getElementById('pColors').value.split(',').map(s => s.trim()).filter(Boolean);
+            const fabric = document.getElementById('pFabric').value || '100% Cotton';
+            const pattern = document.getElementById('pPattern').value || 'Plain';
+            const fit = document.getElementById('pFit').value || 'Regular Fit';
+            const desc = document.getElementById('pDesc').value;
+
+            const sizesObj = {};
+            ['32','34','36','S','M','L','XL','XXL'].forEach(sz => {
+                sizesObj[sz] = document.getElementById(`sz_${sz}`).checked;
+            });
+
+            const newProd = {
+                id, name, code, category, price, available: true, isFeatured: true, isNew: true,
+                fabric, pattern, fit, description: desc, sizes: sizesObj, colors, photos
+            };
+
+            const existingIdx = state.products.findIndex(p => p.id === id);
+            if (existingIdx >= 0) {
+                state.products[existingIdx] = newProd;
+            } else {
+                state.products.unshift(newProd);
+            }
+
+            saveStateToStorage();
+            closeProductForm();
+            showToast("Garment saved successfully!");
+            render();
+        }
+
+        function editProduct(id) {
+            const prod = state.products.find(p => p.id === id);
+            if (!prod) return;
+            openProductForm();
+
+            const titleEl = document.getElementById('formTitle');
+            if (titleEl) titleEl.innerText = `Edit Garment (${prod.code})`;
+
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+
+            setVal('editProdId', prod.id);
+            setVal('pName', prod.name);
+            setVal('pCode', prod.code);
+            setVal('pCategory', prod.category);
+            setVal('pPrice', prod.price);
+            setVal('pPhotos', (prod.photos || []).join(', '));
+            setVal('pColors', (prod.colors || []).join(', '));
+            setVal('pFabric', prod.fabric || '');
+            setVal('pPattern', prod.pattern || '');
+            setVal('pFit', prod.fit || '');
+            setVal('pDesc', prod.description || '');
+
+            ['32','34','36','S','M','L','XL','XXL'].forEach(sz => {
+                const el = document.getElementById(`sz_${sz}`);
+                if (el) el.checked = !!(prod.sizes && prod.sizes[sz]);
+            });
+        }
+
+        function deleteProduct(id) {
+            state.products = state.products.filter(p => p.id !== id);
+            saveStateToStorage();
+            showToast("Product deleted");
+            render();
+        }
+
+        function updateEnquiryStatus(id, newStatus) {
+            const enq = state.enquiries.find(e => e.id === id);
+            if (enq) {
+                enq.status = newStatus;
+                saveStateToStorage();
+                showToast("Enquiry status updated");
+            }
+        }
+
+        function toggleReviewStatus(id, newStatus) {
+            const rev = state.reviews.find(r => r.id === id);
+            if (rev) {
+                rev.status = newStatus;
+                saveStateToStorage();
+                showToast("Review updated");
+                render();
+            }
+        }
+
+        function deleteReview(id) {
+            state.reviews = state.reviews.filter(r => r.id !== id);
+            saveStateToStorage();
+            showToast("Review deleted");
+            render();
+        }
+
+        function saveShopSettings(e) {
+            e.preventDefault();
+            state.settings.address = document.getElementById('setAddress').value;
+            state.settings.phone = document.getElementById('setPhone').value;
+            state.settings.whatsapp = document.getElementById('setWhatsapp').value;
+            state.settings.heroSubtext = document.getElementById('setHeroSubtext').value;
+            saveStateToStorage();
+            showToast("Settings updated!");
+            render();
+        }
+
+        function changeAdminCredentials(e) {
+            e.preventDefault();
+            const newU = document.getElementById('chgUser').value;
+            const newP = document.getElementById('chgPass').value;
+            state.adminAuth.username = newU;
+            state.adminAuth.password = newP;
+            showToast("Admin credentials updated successfully!");
+        }
+
+        function render() {
+            const root = document.getElementById('appRoot');
+            
+            // Update bottom navigation active styles
+            ['home', 'catalogue', 'contact', 'reviews'].forEach(p => {
+                const navBtn = document.getElementById(`nav-${p}`);
+                if (navBtn) {
+                    if (state.currentPage === p) {
+                        navBtn.className = "flex flex-col items-center justify-center w-1/4 py-1 text-stone-900 font-bold transition scale-105";
+                    } else {
+                        navBtn.className = "flex flex-col items-center justify-center w-1/4 py-1 text-stone-400 font-medium transition hover:text-stone-700";
+                    }
+                }
+            });
+
+            // Hide bottom nav if on Admin portal
+            const bottomNav = document.getElementById('bottomNav');
+            if (state.currentPage === 'admin') {
+                bottomNav.classList.add('hidden');
+            } else {
+                bottomNav.classList.remove('hidden');
+            }
+
+            // Page router
+            switch (state.currentPage) {
+                case 'home':
+                    root.innerHTML = renderHome();
+                    break;
+                case 'catalogue':
+                    root.innerHTML = renderCatalogue();
+                    break;
+                case 'product-detail':
+                    root.innerHTML = renderProductDetail();
+                    break;
+                case 'contact':
+                    root.innerHTML = renderContact();
+                    break;
+                case 'reviews':
+                    root.innerHTML = renderReviews();
+                    break;
+                case 'admin':
+                    root.innerHTML = renderAdminDashboard();
+                    break;
+                default:
+                    root.innerHTML = renderHome();
+            }
+        }
+
+        // Initial App Load Trigger
+        window.onload = function() {
+            checkHashRoute();
+            render();
+        };
+    </script>
+</body>
+</html>
